@@ -1,18 +1,19 @@
-from industries import Industries
-from equally_weighted import EquallyWeighted
-from same_period_maket_perf import SamePeriodMarketPerf
-from average_monthly_return import AverageMonthlyReturn
-from globalminvar import GlobalMinVar, GobalMinVarNoSS
-from tangency import Tangency, TangencyNoSS
-from donth import DoNothing
-from testcounter import TestCounter
+from algorithms.equally_weighted import EquallyWeighted
+from algorithms.same_period_maket_perf import SamePeriodMarketPerf
+from algorithms.average_monthly_return import AverageMonthlyReturn
+from algorithms.globalminvar import GlobalMinVar, GobalMinVarNoSS
+from algorithms.tangency import Tangency, TangencyNoSS
+from algorithms.donth import DoNothing
+from tools.testcounter import TestCounter
+from tools.industries import Industries
+from tools.riskfree import RiskFree
 
 import matplotlib.pyplot as plt
 
-YEAR_AVG = 30
+YEAR_AVG = 50
 
 def main():
-    data = Industries('industries.csv')
+    data = Industries('datasets/industries.csv')
     xaxis = range(120)
 
     counter = TestCounter()
@@ -70,8 +71,7 @@ def main():
         global_min_var_no_ss.progressCounter()
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
-    import riskfree
-    riskfreedata = riskfree.RiskFree('risk-free.csv')
+    riskfreedata = RiskFree('datasets/risk-free.csv')
     counter = TestCounter()
     tangency = Tangency(data, counter,riskfreedata, yearavg=YEAR_AVG)
     amount = 1000000.0
@@ -120,7 +120,10 @@ def main():
     plt.title(f'Portfolio Strategy Performance Over Time (Using {YEAR_AVG} Years of Data)')
     plt.grid(True)
     plt.xlim(0, 120)
+    plt.ylim(0, max(max(ew), max(spm), max(amr), max(gmv), max(gmv_no_ss), max(tg), max(tg_no_ss), max(dn)) * 1.1)
     plt.legend()
+    plt.gcf().set_size_inches(16, 9)
+    plt.savefig(f"portfolio_perf_{YEAR_AVG}_years.png",dpi=100)
     plt.show()
 
 if __name__ == '__main__':

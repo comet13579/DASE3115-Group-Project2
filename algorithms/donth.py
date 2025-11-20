@@ -1,5 +1,5 @@
-from testcounter import TestCounter
-from riskfree import RiskFree
+from tools.testcounter import TestCounter
+from tools.riskfree import RiskFree
 
 
 class DoNothing:

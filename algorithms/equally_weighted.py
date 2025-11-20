@@ -1,5 +1,5 @@
-from industries import Industries
-from testcounter import TestCounter
+from tools.industries import Industries
+from tools.testcounter import TestCounter
 
 class EquallyWeighted:
     def __init__(self, data:Industries, counter:TestCounter):

@@ -1,0 +1,2 @@
+For the risk-free.csv was created using the 202508 CRSP database.
+For the industries.csv, Copyright 2020 Kenneth R. French

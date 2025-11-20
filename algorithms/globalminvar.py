@@ -1,19 +1,18 @@
-from industries import Industries
-from testcounter import TestCounter
-from riskfree import RiskFree
+from tools.industries import Industries
+from tools.testcounter import TestCounter
 import numpy as np
 from scipy.optimize import minimize
 
-## A strategy that calculates the tangency portfolio based on historical data.
-class Tangency:
-    def __init__(self, data:Industries, counter:TestCounter, riskfree:RiskFree, yearavg:int):
+
+## A strategy that calculates the global minimum variance portfolio based on historical data.
+class GlobalMinVar:
+    def __init__(self, data:Industries, counter:TestCounter, yearavg:int):
         self.data = data
         self.counter = counter
-        self.riskfree = riskfree
         self.yearavg = yearavg
-        print(f"-----Tangency portfolio strategy {yearavg} years data initialized.-----")
+        print(f"-----Global minimum variance portfolio strategy {yearavg} years data initialized.-----")
 
-    def _calcMeanCoMatrix(self):
+    def _calcCoMatrix(self):
         year = self.counter.getyear()
         month = self.counter.getmonth()
         industries_list = self.data.industries_list()
@@ -23,22 +22,22 @@ class Tangency:
             yearmonth = TestCounter.month_minus_1(year,month)
             temp = []
             while counter != 0:
-                temp.append(self.data.get(ind,yearmonth[0],yearmonth[1]) - self.riskfree.get(yearmonth[0],yearmonth[1]))
+                temp.append(self.data.get(ind,yearmonth[0],yearmonth[1]))
                 counter -= 1
                 yearmonth = TestCounter.month_minus_1(yearmonth[0],yearmonth[1])
             datacalc.append(temp)
         datacalc = np.array(datacalc)
         cov_matrix = np.cov(datacalc, rowvar=True)
-        mean_returns = np.mean(datacalc, axis=1)
-        return mean_returns, cov_matrix
-
-
+        return cov_matrix
+    
     def _calcweight(self):
-        mean_returns, cov_matrix = self._calcMeanCoMatrix()
+        cov_matrix = self._calcCoMatrix()
+        vector_of_ones = np.ones(cov_matrix.shape[0])
         inv_cov_matrix = np.linalg.inv(cov_matrix)
-        weights = inv_cov_matrix.dot(mean_returns)
+        weights = inv_cov_matrix.dot(vector_of_ones)
         normalized_weights = weights / np.linalg.norm(weights)
         return list(normalized_weights)
+
 
     def calculateCurrent(self,amount):
         year = self.counter.getyear()
@@ -59,19 +58,17 @@ class Tangency:
     def progressCounter(self):
         self.counter.progress()
 
-class TangencyNoSS(Tangency):
+class GobalMinVarNoSS(GlobalMinVar):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         print("!! No short-selling version initialized !!")
 
     def _calcweight(self):
-        mean_returns, cov_matrix = self._calcMeanCoMatrix()
+        cov_matrix = self._calcCoMatrix()
         def objective(w):
-            return - (w @ mean_returns) / np.sqrt(w @ cov_matrix @ w)   # maximize Sharpe → minimize negative
-        constraints = [
-            {'type': 'eq',   'fun': lambda w: np.sum(w) - 1},   # sum to 1
-        ]
-        bounds = [(0, 1) for _ in range(len(mean_returns))]                    # no short, no >100%
-        result = minimize(objective, x0=np.ones(len(mean_returns))/len(mean_returns), method='SLSQP',
+            return w @ cov_matrix @ w
+        constraints = [{'type': 'eq', 'fun': lambda w: np.sum(w) - 1}]
+        bounds = [(0, 1) for _ in range(cov_matrix.shape[0])]
+        result = minimize(objective, x0=np.ones(cov_matrix.shape[0])/cov_matrix.shape[0], method='SLSQP',
                       bounds=bounds, constraints=constraints)
         return list(result.x)

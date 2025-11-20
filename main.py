@@ -10,7 +10,7 @@ from tools.riskfree import RiskFree
 
 import matplotlib.pyplot as plt
 
-YEAR_AVG = 50
+YEAR_AVG = 50 ##Change this for different years of data used
 
 def main():
     data = Industries('datasets/industries.csv')

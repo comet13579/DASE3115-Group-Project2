@@ -2,51 +2,72 @@ from industries import Industries
 from equally_weighted import EquallyWeighted
 from same_period_maket_perf import SamePeriodMarketPerf
 from average_monthly_return import AverageMonthlyReturn
-from globalminvar import GlobalMinVar
-from tangency import Tangency
+from globalminvar import GlobalMinVar, GobalMinVarNoSS
+from tangency import Tangency, TangencyNoSS
 from donth import DoNothing
 from testcounter import TestCounter
 
-YEAR_AVG = 5
+import matplotlib.pyplot as plt
+
+YEAR_AVG = 30
 
 def main():
     data = Industries('industries.csv')
-    counter = TestCounter()
-    ew = EquallyWeighted(data, counter)
+    xaxis = range(120)
 
-    # Example calculation
+    counter = TestCounter()
+    equally_weighted = EquallyWeighted(data, counter)
     amount = 1000000.0
+    ew = [0]*120
     for i in range(120):  # Simulate 10 years
-        amount = ew.calculateCurrent(amount)
+        amount = equally_weighted.calculateCurrent(amount)
         #print(f"New amount after iteration {i}: {amount:.2f}")
-        ew.progressCounter()
+        ew[i] = amount
+        equally_weighted.progressCounter()
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     counter = TestCounter()
     same_period_perf = SamePeriodMarketPerf(data, counter, yearavg=YEAR_AVG)
     amount = 1000000.0
+    spm = [0]*120
     for i in range(120):  # Simulate 10 years
         amount = same_period_perf.calculateCurrent(amount)
         #print(f"New amount after iteration {i}: {amount:.2f}")
+        spm[i] = amount
         same_period_perf.progressCounter()
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     counter = TestCounter()
-    same_period_perf = AverageMonthlyReturn(data, counter, yearavg=YEAR_AVG)
+    average_monthly_return = AverageMonthlyReturn(data, counter, yearavg=YEAR_AVG)
     amount = 1000000.0
+    amr = [0]*120
     for i in range(120):  # Simulate 10 years
-        amount = same_period_perf.calculateCurrent(amount)
+        amount = average_monthly_return.calculateCurrent(amount)
         #print(f"New amount after iteration {i}: {amount:.2f}")
-        same_period_perf.progressCounter()
+        amr[i] = amount
+        average_monthly_return.progressCounter()
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     counter = TestCounter()
     global_min_var = GlobalMinVar(data, counter, yearavg=YEAR_AVG)
     amount = 1000000.0
+    gmv = [0]*120
     for i in range(120):  # Simulate 10 years
         amount = global_min_var.calculateCurrent(amount)
         #print(f"New amount after iteration {i}: {amount:.2f}")
+        gmv[i] = amount
         global_min_var.progressCounter()
+    print("Simulation complete, the final amount is {:.2f}".format(amount))
+
+    counter = TestCounter()
+    global_min_var_no_ss = GobalMinVarNoSS(data, counter, yearavg=YEAR_AVG)
+    amount = 1000000.0
+    gmv_no_ss = [0]*120
+    for i in range(120):  # Simulate 10 years
+        amount = global_min_var_no_ss.calculateCurrent(amount)
+        #print(f"New amount after iteration {i}: {amount:.2f}")
+        gmv_no_ss[i] = amount
+        global_min_var_no_ss.progressCounter()
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     import riskfree
@@ -54,20 +75,53 @@ def main():
     counter = TestCounter()
     tangency = Tangency(data, counter,riskfreedata, yearavg=YEAR_AVG)
     amount = 1000000.0
+    tg = [0]*120
     for i in range(120):  # Simulate 10 years
         amount = tangency.calculateCurrent(amount)
         #print(f"New amount after iteration {i}: {amount:.2f}")
+        tg[i] = amount
         tangency.progressCounter()
+    print("Simulation complete, the final amount is {:.2f}".format(amount))
+
+    counter = TestCounter()
+    tangency_no_ss = TangencyNoSS(data, counter,riskfreedata, yearavg=YEAR_AVG)
+    amount = 1000000.0
+    tg_no_ss = [0]*120
+    for i in range(120):  # Simulate 10 years
+        amount = tangency_no_ss.calculateCurrent(amount)
+        #print(f"New amount after iteration {i}: {amount:.2f}")
+        tg_no_ss[i] = amount
+        tangency_no_ss.progressCounter()
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     counter = TestCounter()
     donothing = DoNothing(riskfreedata, counter)
     amount = 1000000.0
+    dn = [0]*120
     for i in range(120):  # Simulate 10 years
         amount = donothing.calculateCurrent(amount)
         #print(f"New amount after iteration {i}: {amount:.2f}")
+        dn[i] = amount
         donothing.progressCounter()
     print("Simulation complete, the final amount is {:.2f}".format(amount))
+
+    #########################################################################
+    ## GRAPH PLOTTING
+    plt.plot(xaxis, ew, label='Equally Weighted')
+    plt.plot(xaxis, spm, label='Same Period Market Performance')
+    plt.plot(xaxis, amr, label='Average Monthly Return')
+    plt.plot(xaxis, gmv, label='Global Minimum Variance')
+    plt.plot(xaxis, gmv_no_ss, label='Global Minimum Variance No Short Selling')
+    plt.plot(xaxis, tg, label='Tangency Portfolio')
+    plt.plot(xaxis, tg_no_ss, label='Tangency Portfolio No Short Selling')
+    plt.plot(xaxis, dn, label='Do Nothing (Risk-Free)')
+    plt.xlabel('Epoches (Months)')
+    plt.ylabel('Amount ($)')
+    plt.title(f'Portfolio Strategy Performance Over Time (Using {YEAR_AVG} Years of Data)')
+    plt.grid(True)
+    plt.xlim(0, 120)
+    plt.legend()
+    plt.show()
 
 if __name__ == '__main__':
     main()

@@ -4,6 +4,7 @@ from same_period_maket_perf import SamePeriodMarketPerf
 from average_monthly_return import AverageMonthlyReturn
 from globalminvar import GlobalMinVar
 from tangency import Tangency
+from donth import DoNothing
 from testcounter import TestCounter
 
 YEAR_AVG = 5
@@ -57,6 +58,15 @@ def main():
         amount = tangency.calculateCurrent(amount)
         #print(f"New amount after iteration {i}: {amount:.2f}")
         tangency.progressCounter()
+    print("Simulation complete, the final amount is {:.2f}".format(amount))
+
+    counter = TestCounter()
+    donothing = DoNothing(riskfreedata, counter)
+    amount = 1000000.0
+    for i in range(120):  # Simulate 10 years
+        amount = donothing.calculateCurrent(amount)
+        #print(f"New amount after iteration {i}: {amount:.2f}")
+        donothing.progressCounter()
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
 if __name__ == '__main__':

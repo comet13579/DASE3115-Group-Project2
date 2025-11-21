@@ -8,10 +8,10 @@ The task of the project is to invest 1 million US dollars on the 30 industry pof
 
 ### Investment Strategies
 1. Average Monthly Return:
-The algorithm calculates the average return of all the industry pofolios using the previous data and **ALL-IN** to the data with best calculated performance. The implementations are in ```algorithms/average_monthly_return.py```
+The algorithm calculates the average return of all the industry pofolios using the previous data and **ALL-IN** to the portfolio with best calculated performance. The implementations are in ```algorithms/average_monthly_return.py```
 
 2. Same Period Maket Performance:
-The algorithm calculates the average return of all the industry pofolios **same month in pervious years** and **ALL-IN** to the data with best calculated performance. The implementations are in ```algorithms/same_period_maket_perf.py```
+The algorithm calculates the average return of all the industry pofolios **same month in pervious years** and **ALL-IN** to the portfolio with best calculated performance. The implementations are in ```algorithms/same_period_maket_perf.py```
 
 3. Do Nothing:
 This algorithm literally does nothing to improve its return and getting interest with the risk free rate (ie 2000001 – 1-month rates on [CSRP](https://www.crsp.org/research/crsp-us-treasury-database/) )

@@ -6,11 +6,12 @@ from scipy.optimize import minimize
 
 ## A strategy that calculates the tangency portfolio based on historical data.
 class Tangency:
-    def __init__(self, data:Industries, counter:TestCounter, riskfree:RiskFree, yearavg:int):
+    def __init__(self, data:Industries, counter:TestCounter, riskfree:RiskFree, yearavg:int, ignore:float=0.0):
         self.data = data
         self.counter = counter
         self.riskfree = riskfree
         self.yearavg = yearavg
+        self.ignore = 0
         print(f"-----Tangency portfolio strategy {yearavg} years data initialized.-----")
 
     def _calcMeanCoMatrix(self):
@@ -32,12 +33,21 @@ class Tangency:
         mean_returns = np.mean(datacalc, axis=1)
         return mean_returns, cov_matrix
 
+    #disabling trade with very small weight (ie 0.0001)
+    def remove_small_weights(self,normalized_weights):
+        for i in range(len(normalized_weights)):
+            if normalized_weights[i] < self.ignore and normalized_weights[i] > -self.ignore:
+                normalized_weights[i] = 0.0
+        normalized_weights = normalized_weights / np.linalg.norm(normalized_weights)
+        return normalized_weights
+
 
     def _calcweight(self):
         mean_returns, cov_matrix = self._calcMeanCoMatrix()
         inv_cov_matrix = np.linalg.inv(cov_matrix)
         weights = inv_cov_matrix.dot(mean_returns)
         normalized_weights = weights / np.linalg.norm(weights)
+        normalized_weights = self.remove_small_weights(normalized_weights)
         return list(normalized_weights)
 
     def calculateCurrent(self,amount):
@@ -46,6 +56,7 @@ class Tangency:
         weights = self._calcweight()
         industries_list = self.data.industries_list()
         revenue_percentage = 0.0
+        #print(f"Calculating for Year: {year}, Month: {month} with weights: {weights}")
         for ind, weight in zip(industries_list, weights):
             #print(f"Industry: {ind}, Weight: {weight:.4f}")
             value = self.data.get(ind, year, month)
@@ -74,4 +85,5 @@ class TangencyNoSS(Tangency):
         bounds = [(0, 1) for _ in range(len(mean_returns))]                    # no short, no >100%
         result = minimize(objective, x0=np.ones(len(mean_returns))/len(mean_returns), method='SLSQP',
                       bounds=bounds, constraints=constraints)
-        return list(result.x)
+        normalized_weights = self.remove_small_weights(result.x)
+        return list(normalized_weights)

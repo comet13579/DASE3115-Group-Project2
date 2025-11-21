@@ -1,5 +1,5 @@
 class TestCounter:
-    def __init__(self):
+    def __init__(self, covid_disabled=False):
         self.counter = 0
 
     def getyear(self):

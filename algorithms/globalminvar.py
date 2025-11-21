@@ -6,10 +6,11 @@ from scipy.optimize import minimize
 
 ## A strategy that calculates the global minimum variance portfolio based on historical data.
 class GlobalMinVar:
-    def __init__(self, data:Industries, counter:TestCounter, yearavg:int):
+    def __init__(self, data:Industries, counter:TestCounter, yearavg:int, ignore:float=0.0):
         self.data = data
         self.counter = counter
         self.yearavg = yearavg
+        self.ignore = ignore
         print(f"-----Global minimum variance portfolio strategy {yearavg} years data initialized.-----")
 
     def _calcCoMatrix(self):
@@ -29,13 +30,22 @@ class GlobalMinVar:
         datacalc = np.array(datacalc)
         cov_matrix = np.cov(datacalc, rowvar=True)
         return cov_matrix
-    
+
+    #disabling trade with very small weight (ie 0.0001)
+    def remove_small_weights(self,normalized_weights):
+        for i in range(len(normalized_weights)):
+            if normalized_weights[i] < self.ignore and normalized_weights[i] > -self.ignore:
+                normalized_weights[i] = 0.0
+        normalized_weights = normalized_weights / np.linalg.norm(normalized_weights)
+        return normalized_weights
+
     def _calcweight(self):
         cov_matrix = self._calcCoMatrix()
         vector_of_ones = np.ones(cov_matrix.shape[0])
         inv_cov_matrix = np.linalg.inv(cov_matrix)
         weights = inv_cov_matrix.dot(vector_of_ones)
         normalized_weights = weights / np.linalg.norm(weights)
+        normalized_weights = self.remove_small_weights(normalized_weights)
         return list(normalized_weights)
 
 
@@ -45,8 +55,8 @@ class GlobalMinVar:
         weights = self._calcweight()
         industries_list = self.data.industries_list()
         revenue_percentage = 0.0
+        ##print(f"Calculating for Year: {year}, Month: {month} with weights: {weights}")
         for ind, weight in zip(industries_list, weights):
-            #print(f"Industry: {ind}, Weight: {weight:.4f}")
             value = self.data.get(ind, year, month)
             if value is not None:
                 revenue_percentage += value * weight
@@ -71,4 +81,5 @@ class GobalMinVarNoSS(GlobalMinVar):
         bounds = [(0, 1) for _ in range(cov_matrix.shape[0])]
         result = minimize(objective, x0=np.ones(cov_matrix.shape[0])/cov_matrix.shape[0], method='SLSQP',
                       bounds=bounds, constraints=constraints)
-        return list(result.x)
+        normalized_weights = self.remove_small_weights(result.x)
+        return list(normalized_weights)

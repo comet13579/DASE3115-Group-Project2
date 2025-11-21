@@ -11,6 +11,7 @@ class GlobalMinVar:
         self.counter = counter
         self.yearavg = yearavg
         self.ignore = ignore
+        self.shortsell = -1
         print(f"-----Global minimum variance portfolio strategy {yearavg} years data initialized.-----")
 
     def _calcCoMatrix(self):
@@ -46,7 +47,7 @@ class GlobalMinVar:
         def objective(w):
             return w @ cov_matrix @ w
         constraints = [{'type': 'eq', 'fun': lambda w: np.sum(w) - 1}]
-        bounds = [(-1, 1) for _ in range(cov_matrix.shape[0])]
+        bounds = [(self.shortsell, 1) for _ in range(cov_matrix.shape[0])]
         result = minimize(objective, x0=np.ones(cov_matrix.shape[0])/cov_matrix.shape[0], method='SLSQP',
                       bounds=bounds, constraints=constraints)
         normalized_weights = self.remove_small_weights(result.x)
@@ -75,15 +76,5 @@ class GlobalMinVar:
 class GobalMinVarNoSS(GlobalMinVar):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.shortsell = 0.0
         print("!! No short-selling version initialized !!")
-
-    def _calcweight(self):
-        cov_matrix = self._calcCoMatrix()
-        def objective(w):
-            return w @ cov_matrix @ w
-        constraints = [{'type': 'eq', 'fun': lambda w: np.sum(w) - 1}]
-        bounds = [(0, 1) for _ in range(cov_matrix.shape[0])]
-        result = minimize(objective, x0=np.ones(cov_matrix.shape[0])/cov_matrix.shape[0], method='SLSQP',
-                      bounds=bounds, constraints=constraints)
-        normalized_weights = self.remove_small_weights(result.x)
-        return list(normalized_weights)

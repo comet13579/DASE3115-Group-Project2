@@ -12,6 +12,7 @@ class Tangency:
         self.riskfree = riskfree
         self.yearavg = yearavg
         self.ignore = ignore
+        self.shortsell = -1
         print(f"-----Tangency portfolio strategy {yearavg} years data initialized.-----")
 
     def _calcMeanCoMatrix(self):
@@ -51,7 +52,7 @@ class Tangency:
         constraints = [
             {'type': 'eq',   'fun': lambda w: np.sum(w) - 1},   # sum to 1
         ]
-        bounds = [(-1, 1) for _ in range(len(mean_returns))]                    # no short, no >100%
+        bounds = [(self.shortsell, 1) for _ in range(len(mean_returns))]                    # no short, no >100%
         result = minimize(objective, x0=np.ones(len(mean_returns))/len(mean_returns), method='SLSQP',
                       bounds=bounds, constraints=constraints)
         normalized_weights = self._remove_small_weights(result.x)
@@ -81,17 +82,6 @@ class Tangency:
 class TangencyNoSS(Tangency):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.shortsell = 0.0
         print("!! No short-selling version initialized !!")
 
-    def _calcweight(self):
-        mean_returns, cov_matrix = self._calcMeanCoMatrix()
-        def objective(w):
-            return - (w @ mean_returns) / np.sqrt(w @ cov_matrix @ w)   # maximize Sharpe → minimize negative
-        constraints = [
-            {'type': 'eq',   'fun': lambda w: np.sum(w) - 1},   # sum to 1
-        ]
-        bounds = [(0, 1) for _ in range(len(mean_returns))]                    # no short, no >100%
-        result = minimize(objective, x0=np.ones(len(mean_returns))/len(mean_returns), method='SLSQP',
-                      bounds=bounds, constraints=constraints)
-        normalized_weights = self._remove_small_weights(result.x)
-        return list(normalized_weights)

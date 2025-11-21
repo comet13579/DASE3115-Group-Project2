@@ -71,7 +71,7 @@ class Tangency:
                 revenue_percentage += value * weight
             else:
                 raise ValueError(f"No data for industry: {ind} in {year}-{month}")
-        print(f"Total revenue percentage: {revenue_percentage:.4f}%")
+        #print(f"Total revenue percentage: {revenue_percentage:.4f}%")
         amount = (1 + revenue_percentage / 100) * amount
         return amount
 

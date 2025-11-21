@@ -10,8 +10,8 @@ from tools.riskfree import RiskFree
 
 import matplotlib.pyplot as plt
 
-YEAR_AVG = 10 ##Change this for different years of data used
-IGNORE_THRESHOLD = 0.001 ##Change this for different threshold for small weights
+YEAR_AVG = 30 ##Change this for different years of data used
+IGNORE_THRESHOLD = 0.0 ##Change this for different threshold for small weights
 
 def main():
     data = Industries('datasets/industries.csv')
@@ -88,7 +88,7 @@ def main():
     tangency_no_ss = TangencyNoSS(data, counter,riskfreedata, yearavg=YEAR_AVG, ignore = IGNORE_THRESHOLD)
     amount = 1000000.0
     tg_no_ss = [0]*120
-    for i in range(0):  # Simulate 10 years
+    for i in range(120):  # Simulate 10 years
         amount = tangency_no_ss.calculateCurrent(amount)
         #print(f"New amount after iteration {i}: {amount:.2f}")
         tg_no_ss[i] = amount

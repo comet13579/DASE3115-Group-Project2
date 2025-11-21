@@ -35,5 +35,5 @@ py main.py
 To change the years of data and the ignorethreshold being calculated, change the ```YEAR_AVG``` and ```IGNORE_THRESHOLD``` value in ```main.py```
 ```python
 YEAR_AVG = 30 ## Change this for different years of data used
-IGNORE_THRESHOLD = 0.001 ##Change this for different threshold for small weights
+IGNORE_THRESHOLD = 0.0 ##Change this for different threshold for small weights
 ```

@@ -63,7 +63,7 @@ class Tangency:
         weights = self._calcweight()
         industries_list = self.data.industries_list()
         revenue_percentage = 0.0
-        print(f"Calculating for Year: {year}, Month: {month} with weights: {weights}")
+        ##print(f"Calculating for Year: {year}, Month: {month} with weights: {weights}")
         for ind, weight in zip(industries_list, weights):
             #print(f"Industry: {ind}, Weight: {weight:.4f}")
             value = self.data.get(ind, year, month)

@@ -38,16 +38,18 @@ class GlobalMinVar:
         for i in range(len(normalized_weights)):
             if abs(normalized_weights[i]) < self.ignore:
                 normalized_weights[i] = 0.0
-        normalized_weights = normalized_weights / np.linalg.norm(normalized_weights)
+        normalized_weights = normalized_weights / np.sum(normalized_weights)
         return normalized_weights
 
     def _calcweight(self):
         cov_matrix = self._calcCoMatrix()
-        vector_of_ones = np.ones(cov_matrix.shape[0])
-        inv_cov_matrix = np.linalg.inv(cov_matrix)
-        weights = inv_cov_matrix.dot(vector_of_ones)
-        normalized_weights = weights / np.linalg.norm(weights)
-        normalized_weights = self.remove_small_weights(normalized_weights)
+        def objective(w):
+            return w @ cov_matrix @ w
+        constraints = [{'type': 'eq', 'fun': lambda w: np.sum(w) - 1}]
+        bounds = [(-1, 1) for _ in range(cov_matrix.shape[0])]
+        result = minimize(objective, x0=np.ones(cov_matrix.shape[0])/cov_matrix.shape[0], method='SLSQP',
+                      bounds=bounds, constraints=constraints)
+        normalized_weights = self.remove_small_weights(result.x)
         return list(normalized_weights)
 
 
@@ -57,7 +59,7 @@ class GlobalMinVar:
         weights = self._calcweight()
         industries_list = self.data.industries_list()
         revenue_percentage = 0.0
-        print(f"Calculating for Year: {year}, Month: {month} with weights: {weights}")
+        ##print(f"Calculating for Year: {year}, Month: {month} with weights: {weights}")
         for ind, weight in zip(industries_list, weights):
             value = self.data.get(ind, year, month)
             if value is not None:

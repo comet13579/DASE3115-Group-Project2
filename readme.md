@@ -19,9 +19,9 @@ This algorithm literally does nothing to improve its return and getting interest
 4. Equally Weighted (Naive Method):
 This algorithm evenly distribute the money into all 30 industry pofolios. Assets are rearranged every month
 
-5. Global Minimum Variance: This algorithm calculates the investment weight of all 30 assets using previous data to find out a combination with the lowest overall variance. The algorithm recalculates the weight every month and  There is also a version which bans short sell. The implementations are in ```algorithms/globalminvar.py```
+5. Global Minimum Variance: This algorithm calculates the investment weight of all 30 assets using previous data to find out a combination with the lowest overall variance. The algorithm recalculates the weight every month and there is also a version which bans short sell. Variable ```ignore``` ignores all the calculatd weight with the threshold lower than it. The implementations are in ```algorithms/globalminvar.py```
 
-6. Tangency Profolio: This algorithms calculates the investments weight of all 30 assets using previous data to find out a combination with the highest [Sharpe ratio](https://en.wikipedia.org/wiki/Sharpe_ratio). The algorithm recalculates the weight every month and  There is also a version which bans short sell. The implementations are in ```algorithms/tangency.py```
+6. Tangency Profolio: This algorithms calculates the investments weight of all 30 assets using previous data to find out a combination with the highest [Sharpe ratio](https://en.wikipedia.org/wiki/Sharpe_ratio). The algorithm recalculates the weight every month and there is also a version which bans short sell. Variable ```ignore``` ignores all the calculatd weight with the threshold lower than it. The implementations are in ```algorithms/tangency.py```
 
 ### How to use
 First, install python and install all the dependency by:
@@ -32,7 +32,8 @@ Then, run the program with provided datasets in ```datasets/```
 ```
 py main.py
 ```
-To change the years of data being calculated, change the ```YEAR_AVG``` value in ```main.py```
+To change the years of data and the ignorethreshold being calculated, change the ```YEAR_AVG``` and ```IGNORE_THRESHOLD``` value in ```main.py```
 ```python
-YEAR_AVG = 50 ## Change this for different years of data used
+YEAR_AVG = 30 ## Change this for different years of data used
+IGNORE_THRESHOLD = 0.001 ##Change this for different threshold for small weights
 ```

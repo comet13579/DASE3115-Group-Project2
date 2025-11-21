@@ -33,8 +33,10 @@ class GlobalMinVar:
 
     #disabling trade with very small weight (ie 0.0001)
     def remove_small_weights(self,normalized_weights):
+        if self.ignore == 0:
+            return normalized_weights
         for i in range(len(normalized_weights)):
-            if normalized_weights[i] < self.ignore and normalized_weights[i] > -self.ignore:
+            if abs(normalized_weights[i]) < self.ignore:
                 normalized_weights[i] = 0.0
         normalized_weights = normalized_weights / np.linalg.norm(normalized_weights)
         return normalized_weights
@@ -55,7 +57,7 @@ class GlobalMinVar:
         weights = self._calcweight()
         industries_list = self.data.industries_list()
         revenue_percentage = 0.0
-        ##print(f"Calculating for Year: {year}, Month: {month} with weights: {weights}")
+        print(f"Calculating for Year: {year}, Month: {month} with weights: {weights}")
         for ind, weight in zip(industries_list, weights):
             value = self.data.get(ind, year, month)
             if value is not None:

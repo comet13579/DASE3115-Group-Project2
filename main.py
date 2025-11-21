@@ -11,6 +11,7 @@ from tools.riskfree import RiskFree
 import matplotlib.pyplot as plt
 
 YEAR_AVG = 30 ##Change this for different years of data used
+IGNORE_THRESHOLD = 0.0 ##Change this for different threshold for small weights
 
 def main():
     data = Industries('datasets/industries.csv')
@@ -50,7 +51,7 @@ def main():
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     counter = TestCounter()
-    global_min_var = GlobalMinVar(data, counter, yearavg=YEAR_AVG, ignore = 0.001)
+    global_min_var = GlobalMinVar(data, counter, yearavg=YEAR_AVG, ignore = IGNORE_THRESHOLD)
     amount = 1000000.0
     gmv = [0]*120
     for i in range(120):  # Simulate 10 years
@@ -61,7 +62,7 @@ def main():
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     counter = TestCounter()
-    global_min_var_no_ss = GobalMinVarNoSS(data, counter, yearavg=YEAR_AVG, ignore = 0.001)
+    global_min_var_no_ss = GobalMinVarNoSS(data, counter, yearavg=YEAR_AVG, ignore = IGNORE_THRESHOLD)
     amount = 1000000.0
     gmv_no_ss = [0]*120
     for i in range(120):  # Simulate 10 years
@@ -73,7 +74,7 @@ def main():
 
     riskfreedata = RiskFree('datasets/risk-free.csv')
     counter = TestCounter()
-    tangency = Tangency(data, counter,riskfreedata, yearavg=YEAR_AVG, ignore = 0.001)
+    tangency = Tangency(data, counter,riskfreedata, yearavg=YEAR_AVG, ignore = IGNORE_THRESHOLD)
     amount = 1000000.0
     tg = [0]*120
     for i in range(120):  # Simulate 10 years
@@ -84,7 +85,7 @@ def main():
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     counter = TestCounter()
-    tangency_no_ss = TangencyNoSS(data, counter,riskfreedata, yearavg=YEAR_AVG, ignore = 0.001)
+    tangency_no_ss = TangencyNoSS(data, counter,riskfreedata, yearavg=YEAR_AVG, ignore = IGNORE_THRESHOLD)
     amount = 1000000.0
     tg_no_ss = [0]*120
     for i in range(120):  # Simulate 10 years

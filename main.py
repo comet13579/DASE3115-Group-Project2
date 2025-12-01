@@ -77,48 +77,60 @@ def main():
     tangency = Tangency(data, counter,riskfreedata, yearavg=YEAR_AVG)
     amount = 1000000.0
     tg = [0]*120
+    total_sharpe = 0.0
     for i in range(120):  # Simulate 10 years
         amount = tangency.calculateCurrent(amount)
         #tangency.print_sharpe()
+        total_sharpe += tangency.sharpe_ratio()
         #print(f"New amount after iteration {i}: {amount:.2f}")
         tg[i] = amount
         tangency.progressCounter()
+    print("Average Sharpe ratio over the period is {:.4f}".format(total_sharpe / 120))
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     counter = TestCounter()
     tangency_no_ss = TangencyNoSS(data, counter,riskfreedata, yearavg=YEAR_AVG)
     amount = 1000000.0
     tg_no_ss = [0]*120
+    total_sharpe = 0.0
     for i in range(120):  # Simulate 10 years
         amount = tangency_no_ss.calculateCurrent(amount)
         #tangency_no_ss.print_sharpe()
+        total_sharpe += tangency_no_ss.sharpe_ratio()
         #print(f"New amount after iteration {i}: {amount:.2f}")
         tg_no_ss[i] = amount
         tangency_no_ss.progressCounter()
+    print("Average Sharpe ratio over the period is {:.4f}".format(total_sharpe / 120))
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     counter = TestCounter()
     tangency_ignore = Tangency(data, counter,riskfreedata, yearavg=YEAR_AVG, ignore = IGNORE_THRESHOLD)
     amount = 1000000.0
     tg_ignore = [0]*120
+    total_sharpe = 0.0
     for i in range(120):  # Simulate 10 years
         amount = tangency_ignore.calculateCurrent(amount)
         #tangency_ignore.print_sharpe()
+        total_sharpe += tangency_ignore.sharpe_ratio()
         #print(f"New amount after iteration {i}: {amount:.2f}")
         tg_ignore[i] = amount
         tangency_ignore.progressCounter()
+    print("Average Sharpe ratio over the period is {:.4f}".format(total_sharpe / 120))
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     counter = TestCounter()
     tangency_no_ss_ignore = TangencyNoSS(data, counter,riskfreedata, yearavg=YEAR_AVG, ignore = IGNORE_THRESHOLD)
     amount = 1000000.0
     tg_no_ss_ignore = [0]*120
+    total_sharpe = 0.0
     for i in range(120):  # Simulate 10 years
         amount = tangency_no_ss_ignore.calculateCurrent(amount)
         #tangency_no_ss_ignore.print_sharpe()
+        total_sharpe += tangency_no_ss_ignore.sharpe_ratio()
         #print(f"New amount after iteration {i}: {amount:.2f}")
         tg_no_ss_ignore[i] = amount
         tangency_no_ss_ignore.progressCounter()
+    print("Average Sharpe ratio over the period is {:.4f}".format(total_sharpe / 120))
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     counter = TestCounter()

@@ -11,7 +11,7 @@ from tools.riskfree import RiskFree
 import matplotlib.pyplot as plt
 
 YEAR_AVG = 30 ##Change this for different years of data used
-IGNORE_THRESHOLD = 0.0 ##Change this for different threshold for small weights
+IGNORE_THRESHOLD = 0.1 ##Change this for different threshold for small weights
 
 def main():
     data = Industries('datasets/industries.csv')
@@ -51,7 +51,7 @@ def main():
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     counter = TestCounter()
-    global_min_var = GlobalMinVar(data, counter, yearavg=YEAR_AVG, ignore = IGNORE_THRESHOLD)
+    global_min_var = GlobalMinVar(data, counter, yearavg=YEAR_AVG, ignore = 0.0)
     amount = 1000000.0
     gmv = [0]*120
     for i in range(120):  # Simulate 10 years
@@ -62,7 +62,7 @@ def main():
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     counter = TestCounter()
-    global_min_var_no_ss = GobalMinVarNoSS(data, counter, yearavg=YEAR_AVG, ignore = IGNORE_THRESHOLD)
+    global_min_var_no_ss = GobalMinVarNoSS(data, counter, yearavg=YEAR_AVG, ignore = 0.0)
     amount = 1000000.0
     gmv_no_ss = [0]*120
     for i in range(120):  # Simulate 10 years
@@ -74,25 +74,51 @@ def main():
 
     riskfreedata = RiskFree('datasets/risk-free.csv')
     counter = TestCounter()
-    tangency = Tangency(data, counter,riskfreedata, yearavg=YEAR_AVG, ignore = IGNORE_THRESHOLD)
+    tangency = Tangency(data, counter,riskfreedata, yearavg=YEAR_AVG)
     amount = 1000000.0
     tg = [0]*120
     for i in range(120):  # Simulate 10 years
         amount = tangency.calculateCurrent(amount)
+        #tangency.print_sharpe()
         #print(f"New amount after iteration {i}: {amount:.2f}")
         tg[i] = amount
         tangency.progressCounter()
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     counter = TestCounter()
-    tangency_no_ss = TangencyNoSS(data, counter,riskfreedata, yearavg=YEAR_AVG, ignore = IGNORE_THRESHOLD)
+    tangency_no_ss = TangencyNoSS(data, counter,riskfreedata, yearavg=YEAR_AVG)
     amount = 1000000.0
     tg_no_ss = [0]*120
     for i in range(120):  # Simulate 10 years
         amount = tangency_no_ss.calculateCurrent(amount)
+        #tangency_no_ss.print_sharpe()
         #print(f"New amount after iteration {i}: {amount:.2f}")
         tg_no_ss[i] = amount
         tangency_no_ss.progressCounter()
+    print("Simulation complete, the final amount is {:.2f}".format(amount))
+
+    counter = TestCounter()
+    tangency_ignore = Tangency(data, counter,riskfreedata, yearavg=YEAR_AVG, ignore = IGNORE_THRESHOLD)
+    amount = 1000000.0
+    tg_ignore = [0]*120
+    for i in range(120):  # Simulate 10 years
+        amount = tangency_ignore.calculateCurrent(amount)
+        #tangency_ignore.print_sharpe()
+        #print(f"New amount after iteration {i}: {amount:.2f}")
+        tg_ignore[i] = amount
+        tangency_ignore.progressCounter()
+    print("Simulation complete, the final amount is {:.2f}".format(amount))
+
+    counter = TestCounter()
+    tangency_no_ss_ignore = TangencyNoSS(data, counter,riskfreedata, yearavg=YEAR_AVG, ignore = IGNORE_THRESHOLD)
+    amount = 1000000.0
+    tg_no_ss_ignore = [0]*120
+    for i in range(120):  # Simulate 10 years
+        amount = tangency_no_ss_ignore.calculateCurrent(amount)
+        #tangency_no_ss_ignore.print_sharpe()
+        #print(f"New amount after iteration {i}: {amount:.2f}")
+        tg_no_ss_ignore[i] = amount
+        tangency_no_ss_ignore.progressCounter()
     print("Simulation complete, the final amount is {:.2f}".format(amount))
 
     counter = TestCounter()
@@ -115,13 +141,15 @@ def main():
     plt.plot(xaxis, gmv_no_ss, label='Global Minimum Variance No Short Selling')
     plt.plot(xaxis, tg, label='Tangency Portfolio')
     plt.plot(xaxis, tg_no_ss, label='Tangency Portfolio No Short Selling')
+    plt.plot(xaxis, tg_ignore, label=f'Tangency Portfolio (ignore {IGNORE_THRESHOLD} weights)')
+    plt.plot(xaxis, tg_no_ss_ignore, label=f'Tangency Portfolio No Short Selling (ignore {IGNORE_THRESHOLD} weights)')
     plt.plot(xaxis, dn, label='Do Nothing (Risk-Free)')
     plt.xlabel('Epoches (Months)')
     plt.ylabel('Amount ($)')
     plt.title(f'Portfolio Strategy Performance Over Time (Using {YEAR_AVG} Years of Data)')
     plt.grid(True)
     plt.xlim(0, 120)
-    plt.ylim(0, max(max(ew), max(spm), max(amr), max(gmv), max(gmv_no_ss), max(tg), max(tg_no_ss), max(dn)) * 1.1)
+    plt.ylim(0, max(max(ew), max(spm), max(amr), max(gmv), max(gmv_no_ss), max(tg), max(tg_no_ss), max(tg_ignore), max(tg_no_ss_ignore), max(dn)) * 1.1)
     plt.legend()
     plt.gcf().set_size_inches(16, 9)
     plt.savefig(f"portfolio_perf_{YEAR_AVG}_years.png",dpi=100)

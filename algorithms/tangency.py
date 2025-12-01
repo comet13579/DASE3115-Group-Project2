@@ -12,6 +12,8 @@ class Tangency:
         self.riskfree = riskfree
         self.yearavg = yearavg
         self.ignore = ignore
+        # cache for calculated weights keyed by (year, month)
+        self._weight_cache = {}
         self.shortsell = -1
         print(f"-----Tangency portfolio strategy {yearavg} years data initialized.-----")
 
@@ -46,6 +48,13 @@ class Tangency:
 
 
     def _calcweight(self):
+        # use (year, month) from counter as cache key
+        year = self.counter.getyear()
+        month = self.counter.getmonth()
+        key = (year, month)
+        if key in self._weight_cache:
+            return list(self._weight_cache[key])
+
         mean_returns, cov_matrix = self._calcMeanCoMatrix()
         def objective(w):
             return - (w @ mean_returns) / np.sqrt(w @ cov_matrix @ w)   # maximize Sharpe → minimize negative
@@ -56,7 +65,33 @@ class Tangency:
         result = minimize(objective, x0=np.ones(len(mean_returns))/len(mean_returns), method='SLSQP',
                       bounds=bounds, constraints=constraints)
         normalized_weights = self._remove_small_weights(result.x)
-        return list(normalized_weights)
+        weights_list = list(normalized_weights)
+        # store in cache
+        try:
+            self._weight_cache[key] = weights_list
+        except Exception:
+            # if cache assignment fails for some reason, just continue without caching
+            pass
+        return weights_list
+
+    def sharpe_ratio(self):
+        """Compute the Sharpe ratio of the current tangency portfolio (excess returns basis).
+
+        Returns:
+            float: Sharpe ratio (returns per unit volatility). Returns 0.0 if portfolio volatility is zero.
+        """
+        mean_returns, cov_matrix = self._calcMeanCoMatrix()
+        weights = np.array(self._calcweight())
+        vol = np.sqrt(weights @ cov_matrix @ weights)
+        if vol == 0 or np.isnan(vol):
+            return 0.0
+        sr = float((weights @ mean_returns) / vol)
+        return sr
+
+    def print_sharpe(self):
+        sr = self.sharpe_ratio()
+        print(f"Sharpe ratio: {sr:.6f}")
+        return sr
 
     def calculateCurrent(self,amount):
         year = self.counter.getyear()
